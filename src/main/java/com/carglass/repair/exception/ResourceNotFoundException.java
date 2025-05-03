@@ -1,7 +1,7 @@
 package com.carglass.repair.exception;
 
 public class ResourceNotFoundException extends RuntimeException {
-    public ResourceNotFoundException(String message) {
-        super(message);
+    public ResourceNotFoundException(Resource resource, Long id) {
+        super(resource.name() + " with id " + id + " not found");
     }
 }
