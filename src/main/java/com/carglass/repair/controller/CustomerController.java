@@ -3,8 +3,10 @@ package com.carglass.repair.controller;
 import com.carglass.repair.entity.Customer;
 import com.carglass.repair.service.CustomerService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -12,6 +14,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/customers")
+@Validated
 public class CustomerController {
 
     @Autowired
@@ -23,7 +26,7 @@ public class CustomerController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Customer> getCustomerById(@PathVariable Long id) {
+    public ResponseEntity<Customer> getCustomerById(@PathVariable @Min(1) Long id) {
         return ResponseEntity.ok(customerService.getCustomerById(id));
     }
 
