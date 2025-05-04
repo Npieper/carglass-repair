@@ -1,0 +1,60 @@
+package com.carglass.repair.service;
+
+import com.carglass.repair.entity.Customer;
+import com.carglass.repair.entity.RepairOrder;
+import com.carglass.repair.exception.ResourceNotFoundException;
+import com.carglass.repair.repository.CustomerRepository;
+import com.carglass.repair.repository.RepairOrderRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+import static com.carglass.repair.exception.Resource.CUSTOMER;
+import static com.carglass.repair.exception.Resource.REPAIR_ORDER;
+
+@Service
+public class RepairOrderService {
+
+    @Autowired
+    private CustomerRepository customerRepository;
+
+    @Autowired
+    private RepairOrderRepository repairOrderRepository;
+
+    public List<RepairOrder> getAllRepairOrders() {
+        return repairOrderRepository.findAll();
+    }
+
+    public RepairOrder getRepairOrderById(Long id) {
+        return repairOrderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(REPAIR_ORDER, id));
+    }
+
+    public void saveRepairOrder(RepairOrder repairOrder) {
+        Customer customer = customerRepository.findById(repairOrder.getCustomer().getId())
+                .orElseThrow(() -> new ResourceNotFoundException(CUSTOMER, repairOrder.getCustomer().getId()));
+        repairOrder.setCustomer(customer);
+        repairOrderRepository.save(repairOrder);
+    }
+
+    public RepairOrder updateRepairOrder(Long id, RepairOrder updatedRepairOrder) {
+        RepairOrder existingRepairOrder =
+                repairOrderRepository.findById(id)
+                        .orElseThrow(() -> new ResourceNotFoundException(REPAIR_ORDER, id));
+
+        existingRepairOrder.setVehicleRegistrationNumber(updatedRepairOrder.getVehicleRegistrationNumber());
+        existingRepairOrder.setStatus(updatedRepairOrder.getStatus());
+        existingRepairOrder.setGlassType(updatedRepairOrder.getGlassType());
+        existingRepairOrder.setOrderDate(updatedRepairOrder.getOrderDate());
+
+        return repairOrderRepository.save(existingRepairOrder);
+    }
+
+
+    public void deleteRepairOrderById(Long id) {
+        RepairOrder repairOrder = repairOrderRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(REPAIR_ORDER, id));
+        repairOrderRepository.delete(repairOrder);
+    }
+}

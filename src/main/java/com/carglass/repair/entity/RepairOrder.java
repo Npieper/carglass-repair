@@ -1,31 +1,36 @@
 package com.carglass.repair.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import lombok.Builder;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
 @Entity
 @NoArgsConstructor
+@Data
 public class RepairOrder {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @ManyToOne
     @JoinColumn(name = "customer_id")
     private Customer customer;
 
+    @NotBlank(message = "VRN is mandatory")
     private String vehicleRegistrationNumber;
 
+    @NotNull(message = "Glass Type is mandatory")
     private GlassType glassType;
 
+    @NotNull(message = "Status is mandatory")
     private Status status;
 
+    @NotNull(message = "Order Date is mandatory")
     private LocalDate orderDate;
 
 }
