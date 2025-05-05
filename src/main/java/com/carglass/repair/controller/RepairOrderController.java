@@ -1,8 +1,11 @@
 package com.carglass.repair.controller;
 
-import com.carglass.repair.entity.RepairOrder;
+import com.carglass.repair.dto.RepairOrderCreateRequestDto;
+import com.carglass.repair.dto.RepairOrderResponseDto;
+import com.carglass.repair.dto.RepairOrderUpdateRequestDto;
 import com.carglass.repair.service.RepairOrderService;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -18,28 +21,30 @@ public class RepairOrderController {
     @Autowired
     private RepairOrderService repairOrderService;
 
+
     @GetMapping
-    public List<RepairOrder> getAllRepairOrders() {
+    public List<RepairOrderResponseDto> getAllRepairOrders() {
         return repairOrderService.getAllRepairOrders();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<RepairOrder> getRepairOrderById(@PathVariable Long id) {
+    public ResponseEntity<RepairOrderResponseDto> getRepairOrderById(@PathVariable @Min(1) Long id) {
         return ResponseEntity.ok(repairOrderService.getRepairOrderById(id));
     }
 
     @PostMapping
-    public ResponseEntity<RepairOrder> createRepairOrder(@RequestBody @Valid RepairOrder repairOrder) {
-        repairOrderService.saveRepairOrder(repairOrder);
-        return ResponseEntity.created(URI.create("/repairorders/" + repairOrder.getId()))
-                .body(repairOrder);
+    public ResponseEntity<RepairOrderResponseDto> createRepairOrder(@RequestBody @Valid
+                                                                    RepairOrderCreateRequestDto repairOrderCreateRequestDto) {
+        RepairOrderResponseDto repairOrderResponseDto = repairOrderService.saveRepairOrder(repairOrderCreateRequestDto);
+        return ResponseEntity.created(URI.create("/repairorders/" + repairOrderResponseDto.id()))
+                .body(repairOrderResponseDto);
     }
 
-
     @PutMapping("/{id}")
-    public ResponseEntity<RepairOrder> updateCustomer(@PathVariable Long id,
-                                                      @RequestBody RepairOrder repairOrder) {
-        RepairOrder updatedRepairOrder = repairOrderService.updateRepairOrder(id, repairOrder);
+    public ResponseEntity<RepairOrderResponseDto> updateCustomer(@PathVariable Long id,
+                                                                 @RequestBody @Valid
+                                                                 RepairOrderUpdateRequestDto repairOrderUpdateRequestDto) {
+        RepairOrderResponseDto updatedRepairOrder = repairOrderService.updateRepairOrder(id, repairOrderUpdateRequestDto);
         return ResponseEntity.ok(updatedRepairOrder);
     }
 

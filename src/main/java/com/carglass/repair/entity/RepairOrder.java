@@ -21,19 +21,15 @@ public class RepairOrder {
     @JoinColumn(name = "customer_id")
     private Customer customer;
 
-    @NotBlank(message = "VRN is mandatory")
     @Column(unique = true)
     private String vehicleRegistrationNumber;
 
-    @NotNull(message = "Glass Type is mandatory")
     @Enumerated(EnumType.STRING)
     private GlassType glassType;
 
-    @NotNull(message = "Status is mandatory")
     @Enumerated(EnumType.STRING)
     private Status status;
 
-    @NotNull(message = "Order Date is mandatory")
     private LocalDate orderDate;
 
 }
