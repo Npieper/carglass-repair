@@ -1,9 +1,12 @@
 package com.carglass.repair.exception;
 
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -49,6 +52,22 @@ public class GlobalExceptionHandler {
                 errorMessage,
                 LocalDateTime.now()
         );
+        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<?> handleJsonParseError(HttpMessageNotReadableException ex) {
+        String message = "Unknown JSON Format";
+
+        if(ex.getCause() instanceof UnrecognizedPropertyException cause) {
+            message = String.format("Unrecognized property '%s'", cause.getPropertyName());
+        }
+
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                message,
+                LocalDateTime.now()
+            );
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
