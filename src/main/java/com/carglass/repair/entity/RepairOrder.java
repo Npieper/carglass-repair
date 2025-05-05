@@ -22,6 +22,7 @@ public class RepairOrder {
     private Customer customer;
 
     @NotBlank(message = "VRN is mandatory")
+    @Column(unique = true)
     private String vehicleRegistrationNumber;
 
     @NotNull(message = "Glass Type is mandatory")

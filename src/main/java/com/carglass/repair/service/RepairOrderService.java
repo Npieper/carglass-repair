@@ -2,6 +2,7 @@ package com.carglass.repair.service;
 
 import com.carglass.repair.entity.Customer;
 import com.carglass.repair.entity.RepairOrder;
+import com.carglass.repair.exception.DuplicateFieldException;
 import com.carglass.repair.exception.ResourceNotFoundException;
 import com.carglass.repair.repository.CustomerRepository;
 import com.carglass.repair.repository.RepairOrderRepository;
@@ -35,6 +36,7 @@ public class RepairOrderService {
         Customer customer = customerRepository.findById(repairOrder.getCustomer().getId())
                 .orElseThrow(() -> new ResourceNotFoundException(CUSTOMER, repairOrder.getCustomer().getId()));
         repairOrder.setCustomer(customer);
+        validateVrnUniqueness(repairOrder.getVehicleRegistrationNumber());
         repairOrderRepository.save(repairOrder);
     }
 
@@ -48,6 +50,8 @@ public class RepairOrderService {
         existingRepairOrder.setGlassType(updatedRepairOrder.getGlassType());
         existingRepairOrder.setOrderDate(updatedRepairOrder.getOrderDate());
 
+        validateVrnUniqueness(updatedRepairOrder.getVehicleRegistrationNumber());
+
         return repairOrderRepository.save(existingRepairOrder);
     }
 
@@ -56,5 +60,11 @@ public class RepairOrderService {
         RepairOrder repairOrder = repairOrderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(REPAIR_ORDER, id));
         repairOrderRepository.delete(repairOrder);
+    }
+
+    private void validateVrnUniqueness(String vehicleRegistrationNumber) {
+        if (repairOrderRepository.existsByVehicleRegistrationNumber(vehicleRegistrationNumber)) {
+            throw new DuplicateFieldException("Vehicle Registration Number");
+        }
     }
 }

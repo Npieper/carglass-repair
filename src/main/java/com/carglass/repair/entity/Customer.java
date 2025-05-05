@@ -1,9 +1,6 @@
 package com.carglass.repair.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -24,6 +21,7 @@ public class Customer {
 
     @Email
     @NotBlank(message = "Email is mandatory")
+    @Column(unique = true)
     private String email;
 
     @Pattern(
@@ -31,5 +29,6 @@ public class Customer {
             message = "Ungültige Telefonnummer"
     )
     @NotBlank(message = "Phone number is mandatory")
+    @Column(unique = true)
     private String phoneNumber;
 }

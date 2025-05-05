@@ -1,6 +1,7 @@
 package com.carglass.repair.service;
 
 import com.carglass.repair.entity.Customer;
+import com.carglass.repair.exception.DuplicateFieldException;
 import com.carglass.repair.exception.ResourceNotFoundException;
 import com.carglass.repair.repository.CustomerRepository;
 import com.carglass.repair.repository.RepairOrderRepository;
@@ -27,6 +28,7 @@ public class CustomerService {
     }
 
     public void saveCustomer(Customer customer) {
+        validateCustomerUniqueness(customer);
         customerRepository.save(customer);
     }
 
@@ -34,6 +36,8 @@ public class CustomerService {
         Customer existingCustomer =
                 customerRepository.findById(id)
                         .orElseThrow(() -> new ResourceNotFoundException(CUSTOMER, id));
+
+        validateCustomerUniqueness(updatedCustomer);
 
         existingCustomer.setPhoneNumber(updatedCustomer.getPhoneNumber());
         existingCustomer.setName(updatedCustomer.getName());
@@ -45,5 +49,15 @@ public class CustomerService {
         Customer customer = customerRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(CUSTOMER, id));
         customerRepository.delete(customer);
+    }
+
+    private void validateCustomerUniqueness(Customer customer) {
+        if (customerRepository.existsByEmail(customer.getEmail())) {
+            throw new DuplicateFieldException("email");
+        }
+
+        if (customerRepository.existsByPhoneNumber(customer.getPhoneNumber())) {
+            throw new DuplicateFieldException("phoneNumber");
+        }
     }
 }
