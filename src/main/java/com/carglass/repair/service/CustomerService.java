@@ -32,7 +32,7 @@ public class CustomerService {
     }
 
     public void saveCustomer(Customer customer) {
-        validateCustomerUniqueness(customer);
+        validateCustomerUniqueness(customer, false);
         customerRepository.save(customer);
     }
 
@@ -41,7 +41,7 @@ public class CustomerService {
                 customerRepository.findById(id)
                         .orElseThrow(() -> new ResourceNotFoundException(CUSTOMER, id));
 
-        validateCustomerUniqueness(updatedCustomer);
+        validateCustomerUniqueness(updatedCustomer, true);
 
         existingCustomer.setPhoneNumber(updatedCustomer.getPhoneNumber());
         existingCustomer.setName(updatedCustomer.getName());
@@ -56,14 +56,25 @@ public class CustomerService {
         customerRepository.delete(customer);
     }
 
-    private void validateCustomerUniqueness(Customer customer) {
-        if (customerRepository.existsByEmail(customer.getEmail())) {
+    private void validateCustomerUniqueness(Customer customer, boolean isUpdate) {
+        if (isDuplicateEmail(customer, isUpdate)) {
             throw new DuplicateFieldException("email");
         }
-
-        if (customerRepository.existsByPhoneNumber(customer.getPhoneNumber())) {
+        if (isDuplicatePhone(customer, isUpdate)) {
             throw new DuplicateFieldException("phoneNumber");
         }
+    }
+
+    private boolean isDuplicateEmail(Customer customer, boolean isUpdate) {
+        return isUpdate
+                ? customerRepository.existsByEmailAndIdNot(customer.getEmail(), customer.getId())
+                : customerRepository.existsByEmail(customer.getEmail());
+    }
+
+    private boolean isDuplicatePhone(Customer customer, boolean isUpdate) {
+        return isUpdate
+                ? customerRepository.existsByPhoneNumberAndIdNot(customer.getPhoneNumber(), customer.getId())
+                : customerRepository.existsByPhoneNumber(customer.getPhoneNumber());
     }
 
     private void validateCustomerInUse(Customer customer) {
