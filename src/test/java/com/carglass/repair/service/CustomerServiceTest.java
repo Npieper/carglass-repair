@@ -1,10 +1,14 @@
 package com.carglass.repair.service;
 
 import com.carglass.repair.entity.Customer;
+import com.carglass.repair.exception.CustomerInUseException;
 import com.carglass.repair.exception.DuplicateFieldException;
 import com.carglass.repair.exception.ResourceNotFoundException;
 import com.carglass.repair.repository.CustomerRepository;
+import com.carglass.repair.repository.RepairOrderRepository;
+import jakarta.validation.ValidationException;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,13 +30,16 @@ public class CustomerServiceTest {
     @Mock
     private CustomerRepository customerRepository;
 
+    @Mock
+    private RepairOrderRepository repairOrderRepository;
+
     @InjectMocks
     private CustomerService customerService;
 
     private static Customer customer;
 
-    @BeforeAll
-    public static void setup(){
+    @BeforeEach
+    public void setup(){
         customer = new Customer();
         customer.setEmail("email@mustermann.de");
         customer.setPhoneNumber("01778377666");
@@ -53,7 +60,7 @@ public class CustomerServiceTest {
     }
 
     @Test
-    void getAllCustomers_withoutCustomer_returnsEmptyList() {
+    void getAllCustomers_empty_returnsEmptyList() {
         List<Customer> customers = List.of();
         when(customerRepository.findAll()).thenReturn(customers);
 
@@ -150,10 +157,19 @@ public class CustomerServiceTest {
     @Test
     void deleteCustomer_existingCustomer_deletesSuccessfully() {
         when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
+        when(repairOrderRepository.existsByCustomer(customer)).thenReturn(false);
 
         customerService.deleteCustomer(1L);
 
         verify(customerRepository, times(1)).delete(customer);
+    }
+
+    @Test
+    void deleteCustomer_existingCustomerWithRepairOrder_throwsCustomerInUseException() {
+        when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
+        when(repairOrderRepository.existsByCustomer(customer)).thenReturn(true);
+
+        assertThrows(CustomerInUseException.class, () -> customerService.deleteCustomer(1L));
     }
 
     @Test

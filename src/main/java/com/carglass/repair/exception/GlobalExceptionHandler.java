@@ -1,6 +1,5 @@
 package com.carglass.repair.exception;
 
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -38,6 +37,16 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(CustomerInUseException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateField(CustomerInUseException ex) {
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.CONFLICT.value(),
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleArgumentNotValid(MethodArgumentNotValidException ex) {
         String errorMessage = ex.getBindingResult().getFieldErrors()
@@ -57,10 +66,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<?> handleJsonParseError(HttpMessageNotReadableException ex) {
-        String message = "Unknown JSON Format";
+        String message;
 
         if(ex.getCause() instanceof UnrecognizedPropertyException cause) {
             message = String.format("Unrecognized property '%s'", cause.getPropertyName());
+        } else {
+            message = "Unknown JSON Format " +  ex.getMessage();
         }
 
         ErrorResponse error = new ErrorResponse(
@@ -100,7 +111,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException ex) {
         ErrorResponse error = new ErrorResponse(
                 HttpStatus.CONFLICT.value(),
-                "Data integrity violation: Duplicated Value for Email or PhoneNumber",
+                "Data integrity violation: " + ex.getMostSpecificCause().getMessage(),
                 LocalDateTime.now()
         );
         return new ResponseEntity<>(error, HttpStatus.CONFLICT);
