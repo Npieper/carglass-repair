@@ -25,6 +25,7 @@ public interface RepairOrderMapper {
         if (id == null) return null;
         Customer customer = new Customer();
         customer.setId(id);
-        return customer;    }
+        return customer;
+    }
 }
 

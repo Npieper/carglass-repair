@@ -12,7 +12,6 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Data
 public class RepairOrder {
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;

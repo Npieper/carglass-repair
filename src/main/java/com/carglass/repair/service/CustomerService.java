@@ -32,7 +32,7 @@ public class CustomerService {
     }
 
     public void saveCustomer(Customer customer) {
-        validateCustomerUniqueness(customer, false);
+        validateCustomerUniqueness(customer.getId(), customer, false);
         customerRepository.save(customer);
     }
 
@@ -41,7 +41,7 @@ public class CustomerService {
                 customerRepository.findById(id)
                         .orElseThrow(() -> new ResourceNotFoundException(CUSTOMER, id));
 
-        validateCustomerUniqueness(updatedCustomer, true);
+        validateCustomerUniqueness(id, updatedCustomer, true);
 
         existingCustomer.setPhoneNumber(updatedCustomer.getPhoneNumber());
         existingCustomer.setName(updatedCustomer.getName());
@@ -56,24 +56,24 @@ public class CustomerService {
         customerRepository.delete(customer);
     }
 
-    private void validateCustomerUniqueness(Customer customer, boolean isUpdate) {
-        if (isDuplicateEmail(customer, isUpdate)) {
+    private void validateCustomerUniqueness(Long id, Customer customer, boolean isUpdate) {
+        if (isDuplicateEmail(id, customer, isUpdate)) {
             throw new DuplicateFieldException("email");
         }
-        if (isDuplicatePhone(customer, isUpdate)) {
+        if (isDuplicatePhone(id, customer, isUpdate)) {
             throw new DuplicateFieldException("phoneNumber");
         }
     }
 
-    private boolean isDuplicateEmail(Customer customer, boolean isUpdate) {
+    private boolean isDuplicateEmail(Long id, Customer customer, boolean isUpdate) {
         return isUpdate
-                ? customerRepository.existsByEmailAndIdNot(customer.getEmail(), customer.getId())
+                ? customerRepository.existsByEmailAndIdNot(customer.getEmail(), id)
                 : customerRepository.existsByEmail(customer.getEmail());
     }
 
-    private boolean isDuplicatePhone(Customer customer, boolean isUpdate) {
+    private boolean isDuplicatePhone(Long id, Customer customer, boolean isUpdate) {
         return isUpdate
-                ? customerRepository.existsByPhoneNumberAndIdNot(customer.getPhoneNumber(), customer.getId())
+                ? customerRepository.existsByPhoneNumberAndIdNot(customer.getPhoneNumber(), id)
                 : customerRepository.existsByPhoneNumber(customer.getPhoneNumber());
     }
 

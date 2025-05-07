@@ -6,8 +6,6 @@ import com.carglass.repair.exception.DuplicateFieldException;
 import com.carglass.repair.exception.ResourceNotFoundException;
 import com.carglass.repair.repository.CustomerRepository;
 import com.carglass.repair.repository.RepairOrderRepository;
-import jakarta.validation.ValidationException;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -24,6 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+
 @ExtendWith(MockitoExtension.class)
 public class CustomerServiceTest {
 
@@ -36,7 +35,7 @@ public class CustomerServiceTest {
     @InjectMocks
     private CustomerService customerService;
 
-    private static Customer customer;
+    private Customer customer;
 
     @BeforeEach
     public void setup(){
@@ -123,8 +122,8 @@ public class CustomerServiceTest {
         updated.setName(updatedName);
 
         when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
-        when(customerRepository.existsByEmail(updatedEmail)).thenReturn(false);
-        when(customerRepository.existsByPhoneNumber(updatedPhoneNumber)).thenReturn(false);
+        when(customerRepository.existsByEmailAndIdNot(updatedEmail, customer.getId())).thenReturn(false);
+        when(customerRepository.existsByPhoneNumberAndIdNot(updatedPhoneNumber, customer.getId())).thenReturn(false);
         when(customerRepository.save(any())).thenReturn(customer);
 
         Customer result = customerService.updateCustomer(1L, updated);
@@ -147,11 +146,10 @@ public class CustomerServiceTest {
         updatedCustomer.setName("New Name");
 
         when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
-        when(customerRepository.existsByEmail(updatedEmail)).thenReturn(false);
-        when(customerRepository.existsByPhoneNumber(updatedPhoneNumber)).thenReturn(true);
+        when(customerRepository.existsByEmailAndIdNot(updatedEmail, customer.getId())).thenReturn(false);
+        when(customerRepository.existsByPhoneNumberAndIdNot(updatedPhoneNumber, customer.getId())).thenReturn(true);
 
         assertThrows(DuplicateFieldException.class, () -> customerService.updateCustomer(1L, updatedCustomer));
-
     }
 
     @Test

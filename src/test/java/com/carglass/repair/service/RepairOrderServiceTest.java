@@ -22,6 +22,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+
 @ExtendWith(MockitoExtension.class)
 public class RepairOrderServiceTest {
 
@@ -124,7 +125,8 @@ public class RepairOrderServiceTest {
         updated.setOrderDate(LocalDate.now());
 
         when(repairOrderRepository.findById(1L)).thenReturn(Optional.of(repairOrder));
-        when(repairOrderRepository.existsByVehicleRegistrationNumber("XYZ789")).thenReturn(false);
+        when(repairOrderRepository.existsByVehicleRegistrationNumberAndIdNot("XYZ789", 1L))
+                .thenReturn(false);
         when(repairOrderRepository.save(any())).thenReturn(repairOrder);
 
         RepairOrder result = repairOrderService.updateRepairOrder(1L, updated);
@@ -141,7 +143,8 @@ public class RepairOrderServiceTest {
         updated.setVehicleRegistrationNumber("DUP123");
         updated.setStatus(Status.ABGESCHLOSSEN);
 
-        when(repairOrderRepository.existsByVehicleRegistrationNumber("DUP123")).thenReturn(true);
+        when(repairOrderRepository.existsByVehicleRegistrationNumberAndIdNot("DUP123", 1L))
+                .thenReturn(true);
 
         assertThrows(DuplicateFieldException.class, () -> repairOrderService.updateRepairOrder(1L, updated));
     }
@@ -152,7 +155,8 @@ public class RepairOrderServiceTest {
         updated.setVehicleRegistrationNumber("XYZ123");
         updated.setStatus(Status.ABGESCHLOSSEN);
 
-        when(repairOrderRepository.existsByVehicleRegistrationNumber("XYZ123")).thenReturn(false);
+        when(repairOrderRepository.existsByVehicleRegistrationNumberAndIdNot("XYZ123", 1L))
+                .thenReturn(false);
         when(repairOrderRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> repairOrderService.updateRepairOrder(1L, updated));

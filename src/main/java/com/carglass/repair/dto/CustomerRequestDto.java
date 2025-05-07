@@ -5,18 +5,18 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
 public record CustomerRequestDto(
-        @NotBlank(message = "Name ist erforderlich")
+        @NotBlank(message = "Name is mandatory")
         String name,
 
         @Email
-        @NotBlank(message = "E-Mail ist erforderlich")
+        @NotBlank(message = "E-Mail is mandatory")
         String email,
 
         @Pattern(
                 regexp = "^(\\+49|0)[1-9][0-9]{1,14}$",
-                message = "Ungültige Telefonnummer"
+                message = "Number is not valid"
         )
-        @NotBlank(message = "Telefonnummer ist erforderlich")
+        @NotBlank(message = "Phone Number is mandatory")
         String phoneNumber
 ) {
 }

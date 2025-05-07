@@ -37,12 +37,12 @@ public class RepairOrderService {
         Customer customer = customerRepository.findById(repairOrder.getCustomer().getId())
                 .orElseThrow(() -> new ResourceNotFoundException(CUSTOMER, repairOrder.getCustomer().getId()));
         repairOrder.setCustomer(customer);
-        validateRepairOrderUniqueness(repairOrder, false);
+        validateRepairOrderUniqueness(repairOrder.getId(), repairOrder, false);
         repairOrderRepository.save(repairOrder);
     }
 
     public RepairOrder updateRepairOrder(Long id, RepairOrder repairOrder) {
-        validateRepairOrderUniqueness(repairOrder, true);
+        validateRepairOrderUniqueness(id, repairOrder, true);
         RepairOrder existingRepairOrder =
                 repairOrderRepository.findById(id)
                         .orElseThrow(() -> new ResourceNotFoundException(REPAIR_ORDER, id));
@@ -69,16 +69,16 @@ public class RepairOrderService {
         repairOrderRepository.delete(repairOrder);
     }
 
-    private void validateRepairOrderUniqueness(RepairOrder repairOrder, boolean isUpdate) {
-        if (isDuplicateVrn(repairOrder, isUpdate)) {
+    private void validateRepairOrderUniqueness(Long id, RepairOrder repairOrder, boolean isUpdate) {
+        if (isDuplicateVrn(id, repairOrder, isUpdate)) {
             throw new DuplicateFieldException("Vehicle Registration Number");
         }
     }
 
-    private boolean isDuplicateVrn(RepairOrder repairOrder, boolean isUpdate) {
+    private boolean isDuplicateVrn(Long id, RepairOrder repairOrder, boolean isUpdate) {
         return isUpdate
                 ? repairOrderRepository.existsByVehicleRegistrationNumberAndIdNot
-                (repairOrder.getVehicleRegistrationNumber(), repairOrder.getId())
+                (repairOrder.getVehicleRegistrationNumber(), id)
                 : repairOrderRepository.existsByVehicleRegistrationNumber(repairOrder.getVehicleRegistrationNumber());
     }
 }
